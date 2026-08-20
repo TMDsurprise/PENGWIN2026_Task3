@@ -1,0 +1,56 @@
+# @package _global_
+defaults:
+  - /model: SFQ
+  - /trainer: default
+  - /hydra: default
+  - /callbacks: sfq_formal
+  - /data: multibone_fragments
+  - _self_
+
+project_name: e25_sfq_area64
+experiment_name: sfq_screen
+seed: 42
+
+data:
+  data_root_sim: ${oc.env:PENGWIN_ROOT,.}/Dataset/PENGWIN26_task3_simulation_fractures_train/points
+  data_type: simu
+  sim2clinic_enabled: true
+  qsmall_hard_ratio: 0.30
+  proposal_ratio: 0.0
+  replay_ratio: 0.10
+  hard_pool_size: 20000
+  hard_pool_per_bucket: 256
+  hard_pool_age_decay: 0.08
+  initial_hard_pool_paths:
+    - ${oc.env:PENGWIN_ROOT,.}/Model/rotation_antiforget_ohm_ra/formal_ddp2_ra_v1/hard_pool/hard_pool_rank_0_epoch_0024.json
+    - ${oc.env:PENGWIN_ROOT,.}/Model/rotation_antiforget_ohm_ra/formal_ddp2_ra_v1/hard_pool/hard_pool_rank_1_epoch_0024.json
+  random_anchor: true
+  merge_prob: 0.15
+  frac_prob: 0.70
+  drop_prob: 0.10
+  region_dropout_prob: 0.10
+  point_jitter_std: 0.002
+  train_subset_size: 4096
+  val_subset_size: 512
+  batch_size: 6
+  num_workers: 8
+
+model:
+  variant: r0
+  optimizer:
+    lr: 2.0e-4
+
+trainer:
+  accelerator: gpu
+  devices: 1
+  strategy: auto
+  precision: 16-mixed
+  max_epochs: 3
+  check_val_every_n_epoch: 1
+  accumulate_grad_batches: 4
+  gradient_clip_val: 0.5
+  log_every_n_steps: 20
+  num_sanity_val_steps: 0
+  default_root_dir: ${oc.env:PENGWIN_ROOT,.}/Model/e25_sfq_area64_20260820/screen_${model.variant}_seed${seed}
+
+ckpt_path: null

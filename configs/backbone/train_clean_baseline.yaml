@@ -1,0 +1,12 @@
+# @package _global_
+defaults:
+  - _self_
+  - /model: AssemblyTransformer_coords
+  - /trainer: default
+  - /hydra: default
+  - /callbacks: default
+  - /data: multibone_fragments
+
+project_name: assemble_coord_baseline
+experiment_name: assemble_coord_baseline
+seed: 42

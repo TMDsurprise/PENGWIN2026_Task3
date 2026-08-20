@@ -1,0 +1,41 @@
+_target_: models.AssemblyNet.fragment_confidence.FragmentConfidenceModule
+
+checkpoint: ???
+candidate_alphas: [0.0, 0.5, 1.0, 1.25]
+axis_offsets_deg: []
+ranking_checkpoint: null
+hidden_dim: 256
+num_context_layers: 3
+num_heads: 8
+dropout: 0.1
+max_parts: 50
+utility_scales: [2.53, 2.76, 2.67, 3.37]
+pair_margin: 0.05
+ce_weight: 1.0
+pair_weight: 0.5
+regression_weight: 0.25
+severe_weight: 0.2
+chamfer_points: 64
+finetune_scope: all
+pa_utility_weight: 0.0
+pa_threshold_normalized: 0.05
+pa_severe_target: false
+c2_metric_margin: 0.05
+c2_severe_tolerance: 0.0
+c2_severe_threshold: 0.2
+
+transformer_model:
+  _target_: models.AssemblyNet.transformer.AssemblyTransformer
+  max_parts: 50
+  embed_dim: 384
+  num_layers: 12
+  num_heads: 8
+  dropout_rate: 0.0
+  output_type: coords
+
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: true
+  lr: 2.0e-4
+  weight_decay: 0.01
+  betas: [0.9, 0.999]

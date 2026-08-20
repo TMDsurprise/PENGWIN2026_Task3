@@ -1,0 +1,45 @@
+_target_: models.AssemblyNet.sfq.SmallFragmentQueryModule
+
+checkpoint: ${oc.env:E25_CHECKPOINT}
+variant: r0
+hidden_dim: 384
+max_parts: 50
+num_heads: 8
+context_layers: 2
+patches_per_fragment: 16
+local_points: 128
+local_radii: [0.05, 0.10, 0.20]
+
+qsmall_threshold_mm: 91.578
+qsmall_gate_center_mm: 105.0
+qsmall_gate_width_mm: 18.0
+qsmall_loss_boost: 2.0
+max_rotation_deg: 30.0
+max_translation_mm: 30.0
+
+rotation_weight: 2.0
+translation_weight: 0.5
+paired_weight: 0.5
+preserve_weight: 0.2
+residual_weight: 0.02
+correction_confidence_weight: 0.2
+point_confidence_weight: 0.1
+confidence_logit_bias: 4.0
+kabsch_uniform_floor: 0.20
+train_new_heads_only: false
+
+transformer_model:
+  _target_: models.AssemblyNet.transformer.AssemblyTransformer
+  max_parts: 50
+  embed_dim: 384
+  num_layers: 12
+  num_heads: 8
+  dropout_rate: 0.0
+  output_type: coords
+
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: true
+  lr: 2.0e-4
+  weight_decay: 0.01
+  betas: [0.9, 0.999]

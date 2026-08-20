@@ -1,0 +1,102 @@
+# @package _global_
+defaults:
+  - /model: AssemblyTransformer_coords
+  - /trainer: default
+  - /hydra: default
+  - /callbacks: default
+  - /data: multibone_fragments
+  - _self_
+
+project_name: e26_fragment_balanced_backbone_20260820
+experiment_name: b1_fragment_context
+seed: 42
+
+data:
+  data_root_sim: "${oc.env:PENGWIN_ROOT,.}/Dataset/PENGWIN26_task3_simulation_fractures_train/points"
+  data_type: simu
+  sim2clinic_enabled: false
+  proposal_ratio: 0.0
+  qsmall_hard_ratio: 0.0
+  replay_ratio: 0.0
+  random_anchor: true
+  merge_prob: 0.15
+  frac_prob: 0.70
+  drop_prob: 0.10
+  region_dropout_prob: 0.10
+  point_jitter_std: 0.002
+  batch_size: 10
+  num_workers: 10
+
+model:
+  checkpoint: "${oc.env:E25_CHECKPOINT}"
+  save_vis_path: "${oc.env:PENGWIN_ROOT,.}/Model/e26_fragment_balanced_backbone_20260820/${experiment_name}"
+  hard_mining_enabled: false
+  anti_forgetting_enabled: false
+  rotation_aware_enabled: true
+  rotation_warmup_epochs: 1
+  fragment_balanced_weight: 0.25
+  centered_weight: 0.010
+  pair_weight: 0.004
+  covariance_weight: 0.005
+  horn_rot_weight: 0.010
+  horn_trans_weight: 0.0015
+  rotation_reference_deg: 10.0
+  translation_reference_mm: 50.0
+  paired_points_per_fragment: 24
+  paired_max_pairs: 96
+  horn_observability_floor: 0.05
+  qsmall_finetune_enabled: true
+  qsmall_weight_boost: 0.75
+  qsmall_weight_threshold_mm: 120.0
+  qsmall_weight_span_mm: 60.0
+  qsmall_eval_threshold_mm: 91.578
+  qsmall_unfreeze_more_epoch: 0
+  qsmall_trainable_last_layers: 0
+  qsmall_train_coordinate_head: false
+  qsmall_base_lr: 5.0e-6
+  qsmall_opened_lr: 1.0e-6
+  qsmall_adapter_lr: 2.0e-4
+  reliability_loss_weight: 0.0
+  reliability_coord_blend: 0.0
+  transformer_model:
+    fragment_context_enabled: true
+    fragment_context_start_layer: 8
+    fragment_context_dim: 192
+    fragment_context_heads: 4
+    point_reliability_enabled: false
+
+trainer:
+  devices: 1
+  strategy: auto
+  precision: 16-mixed
+  max_epochs: 3
+  check_val_every_n_epoch: 1
+  accumulate_grad_batches: 1
+  gradient_clip_val: 0.5
+  log_every_n_steps: 20
+  default_root_dir: "${oc.env:PENGWIN_ROOT,.}/Model/e26_fragment_balanced_backbone_20260820/${experiment_name}"
+
+callbacks:
+  model_checkpoint:
+    dirpath: "${oc.env:PENGWIN_ROOT,.}/Model/e26_fragment_balanced_backbone_20260820/${experiment_name}/checkpoints"
+    filename: "epoch-{epoch}"
+    monitor: val/loss
+    mode: min
+    save_top_k: 2
+    save_last: true
+    save_weights_only: true
+    save_on_train_epoch_end: false
+  early_stopping:
+    monitor: val/loss
+    mode: min
+    patience: 3
+    min_delta: 0.0000001
+  training_log:
+    log_dir: "${oc.env:PENGWIN_ROOT,.}/Model/e26_fragment_balanced_backbone_20260820/${experiment_name}"
+  ema:
+    _target_: callbacks.ema.EMAWeights
+    decay: 0.999
+    update_after_step: 50
+    validate_with_ema: true
+
+ckpt_path: null

@@ -1,0 +1,85 @@
+# @package _global_
+defaults:
+  - /model: AssemblyTransformer_coords
+  - /trainer: default
+  - /hydra: default
+  - /callbacks: default
+  - /data: multibone_fragments
+  - _self_
+
+project_name: rotation_aware_e659_v2
+experiment_name: rotation_aware_e659_v2_formal_5090x2
+seed: 42
+
+data:
+  data_root_sim: ${oc.env:PENGWIN_ROOT,.}/Dataset/PENGWIN26_task3_simulation_fractures_train/points
+  data_type: simu
+  sim2clinic_enabled: false
+  random_anchor: true
+  merge_prob: 0.15
+  frac_prob: 0.70
+  drop_prob: 0.10
+  region_dropout_prob: 0.10
+  point_jitter_std: 0.002
+  batch_size: 4
+  num_workers: 6
+
+model:
+  checkpoint: ${oc.env:PENGWIN_ROOT,.}/Model/baseline_exact_e346828/full_ddp2_b4/checkpoints/epoch-epoch=659.ckpt
+  save_vis_path: ${oc.env:PENGWIN_ROOT,.}/Model/rotation_aware_e659_v2/formal_5090x2
+  hard_mining_enabled: false
+  anti_forgetting_enabled: false
+  rotation_aware_enabled: true
+  rotation_warmup_epochs: 3
+  fragment_balanced_weight: 0.25
+  centered_weight: 0.010
+  pair_weight: 0.004
+  covariance_weight: 0.005
+  horn_rot_weight: 0.010
+  horn_trans_weight: 0.0015
+  rotation_reference_deg: 10.0
+  translation_reference_mm: 50.0
+  paired_points_per_fragment: 24
+  paired_max_pairs: 96
+  horn_observability_floor: 0.05
+  schedule_warmup_epochs: 0.5
+  schedule_decay_epochs: 15.0
+  schedule_initial_lr_ratio: 0.20
+  schedule_min_lr_ratio: 0.10
+  optimizer:
+    lr: 5.0e-6
+
+trainer:
+  devices: 2
+  strategy: ddp
+  precision: 16-mixed
+  max_epochs: 15
+  check_val_every_n_epoch: 1
+  accumulate_grad_batches: 3
+  gradient_clip_val: 0.5
+  log_every_n_steps: 20
+  default_root_dir: ${oc.env:PENGWIN_ROOT,.}/Model/rotation_aware_e659_v2/formal_5090x2
+
+callbacks:
+  model_checkpoint:
+    dirpath: ${oc.env:PENGWIN_ROOT,.}/Model/rotation_aware_e659_v2/formal_5090x2/checkpoints
+    filename: "epoch-{epoch}"
+    monitor: val/rot_err_deg
+    mode: min
+    save_top_k: 5
+    save_last: true
+    save_on_train_epoch_end: false
+  early_stopping:
+    monitor: val/rot_err_deg
+    mode: min
+    patience: 5
+    min_delta: 0.01
+  training_log:
+    log_dir: ${oc.env:PENGWIN_ROOT,.}/Model/rotation_aware_e659_v2/formal_5090x2
+  ema:
+    _target_: callbacks.ema.EMAWeights
+    decay: 0.999
+    update_after_step: 50
+    validate_with_ema: true
+
+ckpt_path: null

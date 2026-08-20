@@ -1,0 +1,34 @@
+# @package _global_
+defaults:
+  - train_e26_b2_reliability
+  - _self_
+
+experiment_name: b3_hard_replay
+
+data:
+  sim2clinic_enabled: true
+  qsmall_hard_ratio: 0.15
+  proposal_ratio: 0.0
+  replay_ratio: 0.10
+  hard_pool_size: 20000
+  hard_pool_per_bucket: 256
+  hard_pool_age_decay: 0.08
+  initial_hard_pool_paths:
+    - "${oc.env:PENGWIN_ROOT,.}/Model/rotation_antiforget_ohm_ra/formal_ddp2_ra_v1/hard_pool/hard_pool_rank_0_epoch_0024.json"
+    - "${oc.env:PENGWIN_ROOT,.}/Model/rotation_antiforget_ohm_ra/formal_ddp2_ra_v1/hard_pool/hard_pool_rank_1_epoch_0024.json"
+
+model:
+  hard_mining_enabled: true
+  hard_loss_weight: 0.10
+  hard_warmup_epochs: 0
+
+trainer:
+  max_epochs: 8
+
+callbacks:
+  model_checkpoint:
+    dirpath: "${oc.env:PENGWIN_ROOT,.}/Model/e26_fragment_balanced_backbone_20260820/${experiment_name}/checkpoints"
+  early_stopping:
+    patience: 4
+  training_log:
+    log_dir: "${oc.env:PENGWIN_ROOT,.}/Model/e26_fragment_balanced_backbone_20260820/${experiment_name}"

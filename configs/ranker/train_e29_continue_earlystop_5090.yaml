@@ -1,0 +1,66 @@
+# @package _global_
+defaults:
+  - /model: FragmentConfidence
+  - /trainer: default
+  - /hydra: default
+  - /callbacks: default
+  - /data: multibone_fragments
+  - _self_
+
+project_name: e25_e2_strict_warmstart
+experiment_name: e29_continue_earlystop
+seed: 42
+
+data:
+  data_root_sim: ${oc.env:PENGWIN_ROOT,.}/Dataset/PENGWIN26_task3_simulation_fractures_train/points
+  data_type: simu
+  sim2clinic_enabled: true
+  proposal_ratio: 0.20
+  replay_ratio: 0.0
+  random_anchor: true
+  merge_prob: 0.15
+  frac_prob: 0.70
+  drop_prob: 0.10
+  region_dropout_prob: 0.10
+  point_jitter_std: 0.002
+  batch_size: 8
+  num_workers: 5
+
+model:
+  checkpoint: ${oc.env:PENGWIN_ROOT,.}/Model/e25_e2_strict_warmstart_20260816/inputs/e25_epoch24.ckpt
+  ranking_checkpoint: ${oc.env:PENGWIN_ROOT,.}/Model/e25_e2_strict_warmstart_20260816/e25_e2_e119_strict_split/checkpoints/epoch-epoch=29.ckpt
+  candidate_alphas: [0.0, 0.5, 1.0, 1.25]
+  axis_offsets_deg: []
+  optimizer:
+    lr: 5.0e-6
+
+trainer:
+  devices: 2
+  strategy: ddp
+  precision: 16-mixed
+  max_epochs: 40
+  check_val_every_n_epoch: 1
+  accumulate_grad_batches: 2
+  gradient_clip_val: 1.0
+  log_every_n_steps: 20
+  default_root_dir: ${oc.env:PENGWIN_ROOT,.}/Model/e25_e2_strict_warmstart_20260816/e29_continue_earlystop
+
+callbacks:
+  model_checkpoint:
+    dirpath: ${oc.env:PENGWIN_ROOT,.}/Model/e25_e2_strict_warmstart_20260816/e29_continue_earlystop/checkpoints
+    filename: "epoch-{epoch}"
+    monitor: val/oracle_regret
+    mode: min
+    save_top_k: 6
+    save_last: true
+    every_n_epochs: 1
+  early_stopping:
+    monitor: val/oracle_regret
+    mode: min
+    patience: 6
+    min_delta: 0.0002
+    verbose: true
+  training_log:
+    log_dir: ${oc.env:PENGWIN_ROOT,.}/Model/e25_e2_strict_warmstart_20260816/e29_continue_earlystop
+
+ckpt_path: null

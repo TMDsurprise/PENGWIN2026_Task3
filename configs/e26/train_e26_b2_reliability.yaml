@@ -1,0 +1,23 @@
+# @package _global_
+defaults:
+  - train_e26_b1_fragment_context
+  - _self_
+
+experiment_name: b2_reliability
+
+model:
+  reliability_loss_weight: 0.020
+  reliability_coord_blend: 0.25
+  reliability_error_temperature_mm: 5.0
+  reliability_uniform_floor: 0.25
+  transformer_model:
+    point_reliability_enabled: true
+
+trainer:
+  max_epochs: 3
+
+callbacks:
+  model_checkpoint:
+    dirpath: "${oc.env:PENGWIN_ROOT,.}/Model/e26_fragment_balanced_backbone_20260820/${experiment_name}/checkpoints"
+  training_log:
+    log_dir: "${oc.env:PENGWIN_ROOT,.}/Model/e26_fragment_balanced_backbone_20260820/${experiment_name}"

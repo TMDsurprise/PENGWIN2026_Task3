@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Training outputs and private data
+Dataset/
+data/
+outputs/
+checkpoints/
+lightning_logs/
+wandb/
+*.ckpt
+*.pth
+*.pt
+*.npz
+*.npy
+*.obj
+*.mha
+*.nii
+*.nii.gz
+
+# Container artifacts
+*.tar
+*.tar.gz
+*.oci
+artifacts_*/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

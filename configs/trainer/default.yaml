@@ -1,0 +1,13 @@
+_target_: lightning.pytorch.trainer.Trainer
+
+accelerator: auto
+devices: auto
+strategy: auto
+precision: 16-mixed
+
+max_epochs: 1000
+default_root_dir: ./output/${experiment_name}
+
+check_val_every_n_epoch: 5
+gradient_clip_val: 1.0
+accumulate_grad_batches: 2

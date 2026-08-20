@@ -1,0 +1,26 @@
+_target_: models.AssemblyNet.lightning_module.AssemblyLightningModule
+output_type: "coords"
+training_mode: "full"
+checkpoint: null
+save_vis_path: ./output/${experiment_name}
+
+transformer_model:
+  _target_: models.AssemblyNet.transformer.AssemblyTransformer
+  max_parts: 50
+  embed_dim: 384
+  num_layers: 12
+  num_heads: 8
+  dropout_rate: 0.0
+  output_type: ${..output_type}
+  fragment_context_enabled: true
+  fragment_context_start_layer: 8
+  fragment_context_dim: 192
+  fragment_context_heads: 4
+  point_reliability_enabled: true
+
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: true
+  lr: 1.0e-4
+  weight_decay: 0.01
+  betas: [0.9, 0.999]

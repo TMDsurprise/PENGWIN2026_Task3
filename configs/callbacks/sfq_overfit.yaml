@@ -1,0 +1,27 @@
+learning_rate_monitor:
+  _target_: lightning.pytorch.callbacks.LearningRateMonitor
+  logging_interval: epoch
+
+model_checkpoint:
+  _target_: lightning.pytorch.callbacks.ModelCheckpoint
+  dirpath: ${trainer.default_root_dir}/checkpoints
+  filename: "epoch-{epoch}"
+  auto_insert_metric_name: true
+  save_last: true
+  save_top_k: 2
+  monitor: val/loss
+  mode: min
+  save_on_train_epoch_end: false
+  every_n_epochs: 1
+
+early_stopping:
+  _target_: lightning.pytorch.callbacks.EarlyStopping
+  monitor: val/loss
+  patience: 20
+  min_delta: 0.000001
+  mode: min
+  verbose: true
+
+training_log:
+  _target_: callbacks.txt_logger.TrainingLogCallback
+  log_dir: ${trainer.default_root_dir}

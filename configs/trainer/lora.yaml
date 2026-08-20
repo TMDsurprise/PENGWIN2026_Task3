@@ -1,0 +1,14 @@
+_target_: lightning.pytorch.trainer.Trainer
+
+accelerator: auto
+devices: auto
+strategy: auto
+precision: 16-mixed
+
+# LoRA fine-tuning converges much faster than full training
+max_epochs: 1000
+default_root_dir: ./output/${experiment_name}
+
+check_val_every_n_epoch: 1
+gradient_clip_val: 1.0
+accumulate_grad_batches: 2
