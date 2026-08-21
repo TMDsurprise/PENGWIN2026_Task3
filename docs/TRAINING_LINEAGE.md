@@ -34,6 +34,10 @@ The final e3 ranker has a 154-epoch optimization lineage.
 | e26 B3 | 8 epochs | e6 | one 5090 |
 | e27 full ranker | max 30, patience 8 | e11 (12th epoch) | one 5090 per parallel run |
 
+For each submitted SFQ branch, the selected 3-epoch screen checkpoint was exported as raw,
+tensor-only weights and used to initialize `configs/sfq/train_sfq_continuation9.yaml`. The
+continuation used seed 42, learning rate `2e-5`, nine epochs, and one RTX 5090 per F/FX job.
+
 Area64, Huber-ridge full calibration, inner C2, and outer C2 do not have neural-network epochs. SFQ,
 e26, and e27 are independent post-backbone modules and must not be added to the 705 backbone epochs as
 if the complete system were trained end-to-end.

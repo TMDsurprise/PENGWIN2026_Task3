@@ -22,8 +22,8 @@ data:
   hard_pool_per_bucket: 256
   hard_pool_age_decay: 0.08
   initial_hard_pool_paths:
-    - ${oc.env:PENGWIN_ROOT,.}/Model/rotation_antiforget_ohm_ra/formal_ddp2_ra_v1/hard_pool/hard_pool_rank_0_epoch_0024.json
-    - ${oc.env:PENGWIN_ROOT,.}/Model/rotation_antiforget_ohm_ra/formal_ddp2_ra_v1/hard_pool/hard_pool_rank_1_epoch_0024.json
+    - ${oc.env:OHM_HARD_POOL_RANK0}
+    - ${oc.env:OHM_HARD_POOL_RANK1}
   random_anchor: true
   merge_prob: 0.15
   frac_prob: 0.70

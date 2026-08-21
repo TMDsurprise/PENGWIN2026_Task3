@@ -8,8 +8,9 @@ defaults:
   - _self_
 
 project_name: e25_sfq_area64
-experiment_name: sfq_screen
+experiment_name: sfq_continuation9
 seed: 42
+init_checkpoint: ${oc.env:SFQ_SCREEN_EXPORT}
 
 data:
   data_root_sim: ${oc.env:PENGWIN_ROOT,.}/Dataset/PENGWIN26_task3_simulation_fractures_train/points
@@ -36,21 +37,21 @@ data:
   num_workers: 8
 
 model:
-  variant: r0
+  variant: ${oc.env:SFQ_VARIANT}
   optimizer:
-    lr: 2.0e-4
+    lr: 2.0e-5
 
 trainer:
   accelerator: gpu
   devices: 1
   strategy: auto
   precision: 16-mixed
-  max_epochs: 3
+  max_epochs: 9
   check_val_every_n_epoch: 1
   accumulate_grad_batches: 4
   gradient_clip_val: 0.5
   log_every_n_steps: 20
   num_sanity_val_steps: 0
-  default_root_dir: ${oc.env:PENGWIN_ROOT,.}/Model/e25_sfq_area64_20260820/screen_${model.variant}_seed${seed}
+  default_root_dir: ${oc.env:SFQ_OUTPUT_DIR}
 
 ckpt_path: null

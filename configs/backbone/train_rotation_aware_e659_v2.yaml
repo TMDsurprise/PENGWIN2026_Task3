@@ -25,7 +25,7 @@ data:
   num_workers: 6
 
 model:
-  checkpoint: ${oc.env:PENGWIN_ROOT,.}/Model/baseline_exact_e346828/full_ddp2_b4/checkpoints/epoch-epoch=659.ckpt
+  checkpoint: ${oc.env:CLEAN_CHECKPOINT}
   save_vis_path: ${oc.env:PENGWIN_ROOT,.}/Model/rotation_aware_e659_v2/formal_5090x2
   hard_mining_enabled: false
   anti_forgetting_enabled: false

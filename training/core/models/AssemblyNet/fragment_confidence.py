@@ -140,7 +140,9 @@ class FragmentConfidenceModule(L.LightningModule):
     def _load_coordinate_checkpoint(self, checkpoint_path: str):
         if not checkpoint_path or not os.path.isfile(checkpoint_path):
             raise FileNotFoundError(f"Coordinate checkpoint not found: {checkpoint_path}")
-        checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
+        # Training-stage inputs are Lightning checkpoints produced by this
+        # repository and include Hydra/OmegaConf metadata in addition to tensors.
+        checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
         state = checkpoint.get("state_dict", checkpoint)
         prefix = "transformer_model."
         stripped = {key[len(prefix):]: value for key, value in state.items() if key.startswith(prefix)}
@@ -155,7 +157,7 @@ class FragmentConfidenceModule(L.LightningModule):
             )
 
     def _load_ranking_checkpoint(self, checkpoint_path: str):
-        checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
+        checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
         source = checkpoint.get("state_dict", checkpoint)
         current = self.state_dict()
         compatible = {}

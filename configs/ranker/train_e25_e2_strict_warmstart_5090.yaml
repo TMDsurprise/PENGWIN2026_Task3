@@ -29,8 +29,8 @@ data:
   num_workers: 5
 
 model:
-  checkpoint: ${oc.env:PENGWIN_ROOT,.}/Model/e25_e2_strict_warmstart_20260816/inputs/e25_epoch24.ckpt
-  ranking_checkpoint: ${oc.env:PENGWIN_ROOT,.}/submission_pengwin_task3_e2_hierarchical/model/e2_primary_e119_state.ckpt
+  checkpoint: ${oc.env:E25_CHECKPOINT}
+  ranking_checkpoint: ${oc.env:E2_RANKER_CHECKPOINT}
   candidate_alphas: [0.0, 0.5, 1.0, 1.25]
   axis_offsets_deg: []
   optimizer:

@@ -100,7 +100,9 @@ def load_coordinate_backbone(
         fragment_context_enabled=True,
         point_reliability_enabled=point_reliability,
     )
-    payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
+    # Candidate backbones may be native Lightning checkpoints with Hydra
+    # metadata. Only use checkpoints produced locally or from a trusted source.
+    payload = torch.load(checkpoint, map_location="cpu", weights_only=False)
     state = payload.get("state_dict", payload)
     prefix = "transformer_model."
     stripped = {

@@ -172,7 +172,7 @@ def weighted_horn_matrices(input_coords: torch.Tensor, target_coords: torch.Tens
             (trace.square() / frobenius_sq.clamp_min(1e-12) - 1.0) * 0.5
         ).clamp(0.0, 1.0)
         valid = torch.bincount(ids, minlength=n_parts) >= 3
-        valid &= torch.isfinite(covariance).all(dim=(-2, -1))
+        valid &= torch.isfinite(covariance).flatten(start_dim=-2).all(dim=-1)
 
         identity = torch.eye(3, device=source.device)[None]
         rotations = torch.where(valid[:, None, None], rotations, identity)

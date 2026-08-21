@@ -82,9 +82,6 @@ def load_e3_ranker(checkpoint: str | Path, device: torch.device) -> FragmentConf
         regression_weight=0.25,
         severe_weight=0.2,
         chamfer_points=64,
-        c2_metric_margin=0.05,
-        c2_severe_tolerance=0.0,
-        c2_severe_threshold=0.2,
     )
     model.to(device).eval()
     return model

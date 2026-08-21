@@ -7,8 +7,8 @@ defaults:
   - /data: multibone_fragments
   - _self_
 
-project_name: e25_e2_strict_warmstart
-experiment_name: e29_continue_earlystop
+project_name: e25_ranker_from_scratch
+experiment_name: e25_ranker_random_init
 seed: 42
 
 data:
@@ -28,39 +28,36 @@ data:
 
 model:
   checkpoint: ${oc.env:E25_CHECKPOINT}
-  ranking_checkpoint: ${oc.env:E25_RANKER_CHECKPOINT}
+  ranking_checkpoint: null
   candidate_alphas: [0.0, 0.5, 1.0, 1.25]
   axis_offsets_deg: []
   optimizer:
-    lr: 5.0e-6
+    lr: 2.0e-5
 
 trainer:
   devices: 2
   strategy: ddp
   precision: 16-mixed
-  max_epochs: 40
-  check_val_every_n_epoch: 1
+  max_epochs: 120
+  check_val_every_n_epoch: 5
   accumulate_grad_batches: 2
   gradient_clip_val: 1.0
   log_every_n_steps: 20
-  default_root_dir: ${oc.env:PENGWIN_ROOT,.}/Model/e25_e2_strict_warmstart_20260816/e29_continue_earlystop
+  default_root_dir: ${oc.env:PENGWIN_ROOT,.}/Model/e25_ranker_from_scratch
 
 callbacks:
   model_checkpoint:
-    dirpath: ${oc.env:PENGWIN_ROOT,.}/Model/e25_e2_strict_warmstart_20260816/e29_continue_earlystop/checkpoints
-    filename: "epoch-{epoch}"
+    dirpath: ${oc.env:PENGWIN_ROOT,.}/Model/e25_ranker_from_scratch/checkpoints
     monitor: val/oracle_regret
     mode: min
-    save_top_k: 6
+    save_top_k: 3
     save_last: true
-    every_n_epochs: 1
   early_stopping:
     monitor: val/oracle_regret
     mode: min
-    patience: 6
-    min_delta: 0.0002
-    verbose: true
+    patience: 8
+    min_delta: 0.0005
   training_log:
-    log_dir: ${oc.env:PENGWIN_ROOT,.}/Model/e25_e2_strict_warmstart_20260816/e29_continue_earlystop
+    log_dir: ${oc.env:PENGWIN_ROOT,.}/Model/e25_ranker_from_scratch
 
 ckpt_path: null

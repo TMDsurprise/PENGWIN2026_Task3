@@ -31,8 +31,51 @@ Zhengliang Li, lizhengliang@sjtu.edu.cn
 
 ## 6. Algorithm name or title
 
-**Small-Fragment-Aware Multi-Candidate Assembly Transformer with Conservative Risk Gating**
-**面向小碎片的多候选骨盆复位 Transformer 与保守风险门控**
+**OBL Reduction V4**
+
+方法副标题：**Small-Fragment-Aware Multi-Candidate Assembly Transformer with Conservative Risk Gating**
+
+中文副标题：**面向小碎片的多候选骨盆复位 Transformer 与保守风险门控**
+
+Grand Challenge：<https://grand-challenge.org/algorithms/obl-reduction-v1/>
+
+### 缩写与符号说明
+
+- **PENGWIN**：Peripelvic Fracture Segmentation and Reduction Planning Challenge，骨盆周围骨折分割与复位规划挑战。
+- **OBL Lab**：本参赛团队名称；本文不对 OBL 另作扩展。
+- **SA**：Sacrum，骶骨。
+- **LI**：Left Innominate bone，左侧髋骨（左半骨盆）。
+- **RI**：Right Innominate bone，右侧髋骨（右半骨盆）。
+- **ID**：Identifier，标识符；fragment ID 表示碎片编号。
+- **OBJ**：Wavefront OBJ，输入三角网格文件格式。
+- **JSON**：JavaScript Object Notation，最终刚体矩阵的结构化输出格式。
+- **MSE**：Mean Squared Error，均方误差。
+- **Smooth-L1**：平滑 L1 损失，也称 Huber 型回归损失。
+- **CE / BCE**：Cross-Entropy / Binary Cross-Entropy，交叉熵/二元交叉熵损失。
+- **SVD**：Singular Value Decomposition，奇异值分解；用于 Kabsch/Horn 刚体解算。
+- **SE(3)**：Special Euclidean Group in 3D，三维特殊欧氏群，表示三维旋转和平移组成的刚体变换。
+- **6D rotation**：连续六维旋转表示；它是旋转参数化方式，不表示物体具有六个旋转自由度。
+- **DDP**：Distributed Data Parallel，PyTorch 多 GPU 数据并行训练。
+- **GPU / CPU**：Graphics Processing Unit / Central Processing Unit，图形处理器/中央处理器。
+- **LR**：Learning Rate，学习率。
+- **RA**：Rotation-Aware，本项目的旋转感知训练阶段。
+- **OHM**：Online Hard-example Mining，在线困难样本挖掘。
+- **OOF**：Out-of-Fold，折外预测；每个患者仅由训练时未见过该患者的模型产生校准预测。
+- **SFQ**：Small-Fragment Query，小碎片查询分支。
+- **SFQ-F**：SFQ 的 Fragment self-attention 版本，即等权碎片 token 自注意力分支。
+- **SFQ-FX**：在 SFQ-F 上增加 Cross-attention 的版本，使碎片查询完整骨盆 patch memory。
+- **B1 / B2 / B3**：本项目 e26 阶段的三个互补候选分支编号，并非通用网络名称。
+- **E2、e3、e25、e26、e27**：本项目实验和 checkpoint 的内部版本标识，不代表 epoch 数或领域标准模型。
+- **C2**：本项目对第二阶段保守候选比较门控（stage-2 conservative candidate-comparison gate）的内部简称；它根据预测收益、严重失败风险和回退条件决定是否采用非安全候选。
+- **TRE**：Target Registration Error，目标配准误差，单位为 mm。
+- **Trans**：Translation Error，平移误差，单位为 mm。
+- **Rot**：Rotation Error，旋转误差，单位为 degree（度）。
+- **CD**：Chamfer Distance，Chamfer 距离；本文官方尺度结果以 mm 报告。
+- **PA**：Part Accuracy，碎片准确率；表示满足赛方表面距离阈值的 fragment 比例。
+- **Qsmall**：本项目按尺寸划分的小碎片子集，不是通用医学分型。
+- **Area64**：本项目的表面积采样策略；按三角面面积分配点数，并保证每个 fragment 至少 64 点。
+- **alpha（α）**：迭代位姿更新的步长缩放系数。
+- **4 x 4 matrix**：齐次刚体变换矩阵，包含 3 x 3 旋转、3 x 1 平移和齐次坐标行。
 
 ## 7. Method description
 
@@ -69,8 +112,10 @@ DDP 和 mixed precision 环境中完成。不同阶段的数据采样与损失�
 
 #### 7.2.1 原始四候选与 e3 Ranker
 
-e25 主干首先通过四种更新步长 `alpha=[0, 0.5, 1.0, 1.25]` 生成四个原始迭代候选。原始 Ranker
-并非从零训练，其真实血缘为：历史 E2 Ranker `epoch=119`（120 轮）作为初始化；随后冻结 e25
+原始 e3 Ranker 的四个候选槽位在训练实现中定义为 `alpha=[0, 0.5, 1.0, 1.25]`。冻结提交的
+exact-full 在线链根据 Clinical170 OOF 校准将实际 source alpha 固定为 `[0, 1.0, 1.25, 1.25]`；
+后续外层 e27 对四个异构完整骨盆候选使用 `[0, 1.0, 1.0, 1.0]` 作为 candidate-source 编码。
+原始 Ranker 并非从零训练，其真实血缘为：历史 E2 Ranker `epoch=119`（120 轮）作为初始化；随后冻结 e25
 coordinate backbone，在双 RTX 5090 上对 Ranker 进行 30 轮 e25-specific strict recalibration，
 得到 `epoch=29`；再以更低学习率继续训练，最终选择 continuation 的 `epoch=3`，即额外 4 轮。
 因此最终原始 e3 Ranker 的参数血缘累计经历 154 轮优化，其中最后 34 轮专门适配 e25 主干。
@@ -142,7 +187,7 @@ e27 在 8617 个 simulation training samples 和 958 个 patient-held-out valida
 2. 每骨采样 5000 点，按表面积分配，每个 fragment 至少 64 点。
 3. 对病例中心化并做各向同性尺度归一化。
 4. 使用 e25 坐标主干预测逐点配对目标坐标，并用 Kabsch/Horn 求解 fragment 刚体更新。
-5. 运行 `alpha=[0,0.5,1.0,1.25]` 四候选迭代，由 e3 Ranker+C2 得到安全基准位姿。
+5. 使用冻结部署的 source alpha `[0,1.0,1.25,1.25]` 运行四候选迭代，由 e3 Ranker+C2 得到安全基准位姿。
 6. 使用 SFQ-F/FX 生成小碎片修正候选，通过内部校准和 C2 得到 exact-full candidate 0。
 7. 独立运行 e26 B1、B2、B3，得到 candidates 1-3。
 8. 将四套完整骨盆位姿映射到同一 canonical state。
@@ -229,18 +274,24 @@ Clinical170 参与了低容量校准和候选消融，因此该结果是冻结�
 
 ### 15.1 坐标主干
 
-基础损失为预测复位坐标与 simulation 配对目标坐标之间的 point-wise MSE。Rotation-aware 辅助项为：
+基础坐标项不是在完整 point-wise MSE 上额外叠加 `0.25` 倍 fragment loss，而是二者的凸组合：
 
 ```text
-L_rot_aux = 0.25   * L_fragment_balanced_coordinate
-          + 0.010  * L_centered_vector
-          + 0.004  * L_long_baseline_pair
-          + 0.005  * L_cross_covariance
-          + 0.010  * L_Horn_rotation
-          + 0.0015 * L_Horn_translation
+L_coord = 0.75 * L_global_point_MSE
+        + 0.25 * L_fragment_balanced_MSE
+
+L_RA = L_coord + s(epoch) * (
+          0.010  * L_centered_vector
+        + 0.004  * L_long_baseline_pair
+        + 0.005  * L_cross_covariance
+        + 0.010  * L_Horn_rotation
+        + 0.0015 * L_Horn_translation
+       )
 ```
 
-OHM 阶段混合常规样本、困难样本、replay 与 selective rotation-teacher consistency。
+其中 `s(epoch)` 是 rotation auxiliary warm-up。OHM 阶段将 `L_coord` 与按病例难度加权的
+`L_hard` 混合，混合权重 warm-up 后最大为 `0.30`；上述 rotation auxiliary 始终保留，并且每
+4 个 step 以权重 `0.020` 施加一次仅针对可靠自然样本的 selective rotation-teacher consistency。
 
 ### 15.2 SFQ residual
 
@@ -252,7 +303,10 @@ L_SFQ = 2.0  * L_rotation_chordal
       + 0.02 * L_residual_regularization
 ```
 
-尺寸门控提高 Qsmall 权重；preserve loss 惩罚相对 e25 base pose 的 Rot/Trans/TRE 恶化。
+前三项采用 `w_i = 1 + 2 * qsmall_strength_i` 的 fragment 加权平均；translation 和 paired-coordinate
+误差先换算为毫米并除以 30 mm 归一化。preserve loss 惩罚相对 e25 base pose 的 Rot/Trans/TRE
+恶化。通用 SFQ 代码还支持 correction-confidence BCE 和 point-confidence KL，但冻结提交只使用
+F/FX 变体，未启用 G/H confidence heads，因此这两项在上传权重中严格为零。
 
 ### 15.3 Candidate Ranker
 
@@ -265,7 +319,10 @@ L_rank = 1.0  * L_hard_oracle_CE
        + 0.2  * L_severe_BCE
 ```
 
-其中 metric regression 使用 Smooth-L1；severe 标签定义为 `Rot > 30 deg` 或 `Trans > 20 mm`。
+其中 hard-oracle 是归一化 utility 最低的候选；pairwise loss 只监督 utility 差异大于 `0.05` 的
+候选对。metric head 使用 Smooth-L1 回归 `log(1 + metric)`，推理时通过 `expm1` 恢复；CD 是每个
+候选采样 64 点计算的几何 proxy。最终 utility 不包含 PA，severe 标签定义为 `Rot > 30 deg` 或
+`Trans > 20 mm`。
 Huber-ridge calibration 和 C2 是低容量/确定性后处理，不产生上述神经网络损失。
 
 ## 16. Base network architecture

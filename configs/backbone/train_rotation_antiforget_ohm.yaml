@@ -29,7 +29,7 @@ data:
   num_workers: 6
 
 model:
-  checkpoint: ${oc.env:PENGWIN_ROOT,.}/Model/rotation_aware_e659_v2/ab_seed_epoch19/epoch-epoch=19.ckpt
+  checkpoint: ${oc.env:RA_CHECKPOINT}
   save_vis_path: ${oc.env:PENGWIN_ROOT,.}/Model/rotation_antiforget_ohm_ra/formal_ddp2_ra_v1
   hard_mining_enabled: true
   hard_loss_weight: 0.30

@@ -1,7 +1,9 @@
-# PENGWIN 2026 Task 3 - OBL Lab
+# OBL Reduction V4
 
-Code release for OBL Lab's PENGWIN 2026 Task 3 pelvic fracture reduction method:
-**Small-Fragment-Aware Multi-Candidate Assembly Transformer with Conservative Risk Gating**.
+Code release for OBL Lab's PENGWIN 2026 Task 3 algorithm,
+[OBL Reduction V4](https://grand-challenge.org/algorithms/obl-reduction-v1/).
+
+Method subtitle: **Small-Fragment-Aware Multi-Candidate Assembly Transformer with Conservative Risk Gating**.
 
 The method predicts a rigid `4 x 4` reduction matrix for every SA/LI/RI fracture fragment. It extends
 the official Task 3 Assembly Transformer baseline with rotation-aware coordinate supervision,
@@ -65,22 +67,53 @@ The published YAML files preserve the selected settings while replacing server-s
 export PENGWIN_ROOT=/path/to/PENGWIN2026
 cd training/core
 python train.py --config-name backbone/train_clean_baseline
+CLEAN_CHECKPOINT=/path/to/clean-e659.ckpt \
 python train.py --config-name backbone/train_rotation_aware_e659_v2
+RA_CHECKPOINT=/path/to/rotation-aware-e19.ckpt \
 python train.py --config-name backbone/train_rotation_antiforget_ohm
 
+# The completed dual-rank OHM run writes one replay pool per rank.
+export OHM_HARD_POOL_RANK0=/path/to/hard_pool_rank_0_epoch_0024.json
+export OHM_HARD_POOL_RANK1=/path/to/hard_pool_rank_1_epoch_0024.json
+
 # Recalibrate the original four-candidate ranker on e25.
+E25_CHECKPOINT=/path/to/e25-e24.ckpt \
+E2_RANKER_CHECKPOINT=/path/to/e2-ranker-e119.ckpt \
 python train.py --config-name ranker/train_e25_e2_strict_warmstart_5090
+E25_CHECKPOINT=/path/to/e25-e24.ckpt \
+E25_RANKER_CHECKPOINT=/path/to/e25-ranker-e29.ckpt \
 python train.py --config-name ranker/train_e29_continue_earlystop_5090
 
+# Weight-free alternative when the historical e119 ranker is unavailable.
+# This reproduces the executable pipeline, but it is not checkpoint-identical
+# to the submitted model and therefore does not guarantee identical metrics.
+E25_CHECKPOINT=/path/to/e25-e24.ckpt \
+python train.py --config-name ranker/train_e25_ranker_from_scratch
+
 # Train the complementary e26 candidates.
+E25_CHECKPOINT=/path/to/e25-e24.ckpt \
 python train.py --config-name e26/train_e26_b1_fragment_context
+E25_CHECKPOINT=/path/to/e26-b1-e1.ckpt \
 python train.py --config-name e26/train_e26_b2_reliability
+E25_CHECKPOINT=/path/to/e26-b2-e2.ckpt \
 python train.py --config-name e26/train_e26_b3_hard
 
 # Train SFQ in its dedicated source tree.
 cd ../sfq
+E25_CHECKPOINT=/path/to/e25-e24.ckpt \
 python train.py --config-name sfq/train_sfq_screen model.variant=f
+E25_CHECKPOINT=/path/to/e25-e24.ckpt \
 python train.py --config-name sfq/train_sfq_screen model.variant=fx
+
+# Export the selected 3-epoch screen checkpoint as tensor-only raw weights.
+python tools/export_sfq_checkpoint.py \
+  --input /path/to/selected-screen.ckpt \
+  --output /path/to/screen-best-raw.ckpt --mode raw
+
+# The frozen submission then continued each F/FX branch for nine epochs at 2e-5.
+SFQ_SCREEN_EXPORT=/path/to/screen-best-raw.ckpt \
+SFQ_VARIANT=f SFQ_OUTPUT_DIR=/path/to/formal_f_warm9_lr2e5_seed42 \
+python train.py --config-name sfq/train_sfq_continuation9
 ```
 
 Later stages require the checkpoint named by the preceding stage. Full commands and selected epochs
@@ -100,6 +133,24 @@ python training/tools/train_e27_cached_ranker.py \
 
 The exact checkpoint paths are environment variables rather than server-specific paths. Set
 `E25_CHECKPOINT` and the stage-specific checkpoint variables before launching each continuation.
+
+### Reproducibility boundary
+
+All source code, configurations, losses, sampling policies, cache builders, and calibration tools are
+published. Challenge data and trained weights are not redistributed. The submitted checkpoint used
+the historical e119 ranker initialization documented above. Consequently, an exact numerical replay
+requires that trusted checkpoint (or retraining its 120-epoch stage); the weight-free configuration
+provides a complete random-initialized route but is not claimed to reproduce the frozen Clinical170
+numbers bit-for-bit.
+
+The public regression tests can be run with:
+
+```bash
+python -m pytest -q tests
+# The files are also executable directly if pytest is unavailable.
+python tests/test_e27_policy.py
+python tests/test_fragment_geometry.py
+```
 
 ## Inference and evaluation
 
