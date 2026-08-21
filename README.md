@@ -27,7 +27,9 @@ fragment meshes
 The coordinate-backbone lineage is Clean e659 (660 epochs), rotation-aware e19 (20 epochs), and
 anti-forgetting OHM e24 (25 epochs), for 705 sequential epochs. The original candidate-ranker lineage
 is historical e119 (120 epochs), e25 strict recalibration (30 epochs), and low-LR continuation (4 epochs).
-See [the full algorithm description](docs/ALGORITHM_DESCRIPTION_CN.md) for the exact training chain.
+See the full algorithm description in
+[English](docs/ALGORITHM_DESCRIPTION_EN.md) or
+[Chinese](docs/ALGORITHM_DESCRIPTION_CN.md) for the exact training chain.
 
 ## Repository layout
 
