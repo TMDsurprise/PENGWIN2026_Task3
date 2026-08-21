@@ -13,7 +13,7 @@ OBL Lab
 
 ## 3. Authors
 
-Zhengliang Li, Tianyun Gu, Nan Zheng, Chunjie Xia, Wanxian Yu, and Yangyang Yang
+Zhengliang Li, Tianyun Gu, Nan Zheng, Chunjie Xia, Wanxin Yu, and Yangyang Yang
 
 ## 4. Affiliations
 
@@ -22,7 +22,7 @@ Zhengliang Li, Tianyun Gu, Nan Zheng, Chunjie Xia, Wanxian Yu, and Yangyang Yang
 2. School of Intelligent Sports Engineering, Shanghai University of Sport, Shanghai, China
    上海体育大学智能体育工程学院，中国上海
 
-Zhengliang Li、Tianyun Gu、Nan Zheng、Chunjie Xia 和 Wanxian Yu 隶属于单位 1；
+Zhengliang Li、Tianyun Gu、Nan Zheng、Chunjie Xia 和 Wanxin Yu 隶属于单位 1；
 Yangyang Yang 隶属于单位 2。
 
 ## 5. Contact author and email address

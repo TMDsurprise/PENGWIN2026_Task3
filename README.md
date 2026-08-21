@@ -30,6 +30,7 @@ is historical e119 (120 epochs), e25 strict recalibration (30 epochs), and low-L
 See the full algorithm description in
 [English](docs/ALGORITHM_DESCRIPTION_EN.md) or
 [Chinese](docs/ALGORITHM_DESCRIPTION_CN.md) for the exact training chain.
+A shorter forum-ready [English description](docs/ALGORITHM_DESCRIPTION_EN_CONCISE.md) is also provided.
 
 ## Repository layout
 
@@ -190,7 +191,7 @@ repository does not assert a new license over upstream-derived files. See [NOTIC
 
 ## Authors
 
-Zhengliang Li, Tianyun Gu, Nan Zheng, Chunjie Xia, Wanxian Yu, and Yangyang Yang.
+Zhengliang Li, Tianyun Gu, Nan Zheng, Chunjie Xia, Wanxin Yu, and Yangyang Yang.
 
 Affiliations: School of Biomedical Engineering, Shanghai Jiao Tong University; School of Intelligent
 Sports Engineering, Shanghai University of Sport.

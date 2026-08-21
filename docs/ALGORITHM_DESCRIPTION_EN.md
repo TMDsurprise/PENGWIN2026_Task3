@@ -14,14 +14,14 @@ OBL Lab
 
 ## 3. Authors
 
-Zhengliang Li, Tianyun Gu, Nan Zheng, Chunjie Xia, Wanxian Yu, and Yangyang Yang
+Zhengliang Li, Tianyun Gu, Nan Zheng, Chunjie Xia, Wanxin Yu, and Yangyang Yang
 
 ## 4. Affiliations
 
 1. School of Biomedical Engineering, Shanghai Jiao Tong University, Shanghai, China
 2. School of Intelligent Sports Engineering, Shanghai University of Sport, Shanghai, China
 
-Zhengliang Li, Tianyun Gu, Nan Zheng, Chunjie Xia, and Wanxian Yu are affiliated with institution 1.
+Zhengliang Li, Tianyun Gu, Nan Zheng, Chunjie Xia, and Wanxin Yu are affiliated with institution 1.
 Yangyang Yang is affiliated with institution 2.
 
 ## 5. Contact author and email address
@@ -423,6 +423,9 @@ rollback conditions. The internal exact-full C2 uses `margin=0.15`. The outer C2
 ## 18. Public code repository
 
 <https://github.com/TMDsurprise/PENGWIN2026_Task3>
+
+The source code is publicly available at the repository above. Trained weights and
+challenge-provided data are not redistributed.
 
 ## 19. Relevant references
 
